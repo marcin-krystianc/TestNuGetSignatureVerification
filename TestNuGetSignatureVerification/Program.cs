@@ -3,8 +3,6 @@
 using Microsoft.Build.Locator;
 using TestNuGetSignatureVerification;
 
-Console.WriteLine("Hello, World!");
-
 var instance = MSBuildLocator.RegisterDefaults();
 Console.WriteLine($"Using MSBuild:{instance.MSBuildPath}");
 

@@ -22,17 +22,8 @@ public class PackageVerifier
         var providers = Repository.Provider.GetCoreV3();
         var settings = global::NuGet.Configuration.Settings.LoadDefaultSettings(null);
         var globalPackages = SettingsUtility.GetGlobalPackagesFolder(settings);
-        
         var sources = PackageSourceProvider.LoadPackageSources(settings);
-        /*
-        foreach (var packageSource in sources)
-        {
-            var sourceRepository = Repository.Factory.GetCoreV3(packageSource.Name);
-            var repositorySignatureResource = await sourceRepository.GetResourceAsync<RepositorySignatureResource>(CancellationToken.None);
-            repositorySignatureResource?.UpdateRepositorySignatureInfo();
-        }
-        */
-        
+
         var mainSource = sources
             .Where(x => x.IsEnabled)
             .Where(x => x.IsHttp)
@@ -43,7 +34,7 @@ public class PackageVerifier
             .EnumerateFiles(globalPackages, "*.nupkg", SearchOption.AllDirectories)
             .ToList();
 
-        Console.WriteLine($"Found {packages.Count} packages in '{globalPackages}" );
+        Console.WriteLine($"Found {packages.Count} packages in '{globalPackages}");
         var clientPolicyContext = ClientPolicyContext.GetClientPolicy(settings, NullLogger.Instance);
 
         var packagePathResolver = new PackagePathResolver(globalPackages);
@@ -62,5 +53,4 @@ public class PackageVerifier
         sw.Stop();
         Console.WriteLine($"Verified {packages.Count} packages in '{sw.Elapsed.TotalSeconds} seconds with degree of parallelism={degreeOfParallelism}" );
     }
-    
 }
