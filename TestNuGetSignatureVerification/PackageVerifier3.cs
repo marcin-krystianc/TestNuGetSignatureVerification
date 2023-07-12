@@ -46,11 +46,15 @@ public class PackageVerifier3
         var sw = Stopwatch.StartNew();
         var rsaSw = new Stopwatch();
         var getCertificateSw = new Stopwatch();
+        var getPrimarySw = new Stopwatch();
         foreach (var packagePath in packages)
         {
             using (var packageReader = new PackageArchiveReader(packagePath))
             {
+                getPrimarySw.Start();
                 var primarySignature = await packageReader.GetPrimarySignatureAsync(CancellationToken.None);
+                getPrimarySw.Stop();
+                
                 if (primarySignature is RepositoryPrimarySignature repositoryPrimarySignature)
                 {
                     var certificate = repositoryPrimarySignature.SignerInfo.Certificate;
@@ -101,6 +105,6 @@ public class PackageVerifier3
         }
 
         sw.Stop();
-        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{getCertificateSw.Elapsed.TotalSeconds}/{rsaSw.Elapsed.TotalSeconds}/{sw.Elapsed.TotalSeconds}', count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
+        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{getPrimarySw.Elapsed.TotalSeconds}/{getCertificateSw.Elapsed.TotalSeconds}/{rsaSw.Elapsed.TotalSeconds}/{sw.Elapsed.TotalSeconds}', count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
     }
 }
