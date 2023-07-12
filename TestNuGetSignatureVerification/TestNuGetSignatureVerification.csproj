@@ -9,7 +9,8 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Build.Locator" Version="1.5.5" />
-        <PackageReference Include="NuGet.Packaging" Version="5.6.0" ExcludeAssets="runtime" />
-        <PackageReference Include="NuGet.Protocol" Version="5.6.0" ExcludeAssets="runtime" />
+        <PackageReference Include="NuGet.Packaging" Version="6.5.0" ExcludeAssets="runtime" />
+        <PackageReference Include="NuGet.Protocol" Version="6.5.0" ExcludeAssets="runtime" />
+        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="6.0.0" ExcludeAssets="runtime" />
     </ItemGroup>
 </Project>
