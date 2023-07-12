@@ -49,24 +49,23 @@ public class PackageVerifier3
         {
             using (var packageReader = new PackageArchiveReader(packagePath))
             {
-                var isSigned = await packageReader.IsSignedAsync(CancellationToken.None);
-                if (isSigned)
+                var primarySignature = await packageReader.GetPrimarySignatureAsync(CancellationToken.None);
+                if (primarySignature is RepositoryPrimarySignature repositoryPrimarySignature)
                 {
-                    var primarySignature = await packageReader.GetPrimarySignatureAsync(CancellationToken.None);
-                    if (primarySignature is RepositoryPrimarySignature repositoryPrimarySignature)
-                    {
-                        var certificate = repositoryPrimarySignature.SignerInfo.Certificate;
-                   
-                        rsaSw.Start();
-                        RSA? publicKey = certificate?.GetRSAPublicKey();
-                        rsaSw.Stop();
-                        
-                        if (publicKey != null)
-                        {
-                            rsaCount++;
-                        }
-                    }
+                    var certificate = repositoryPrimarySignature.SignerInfo.Certificate;
+               
+                    rsaSw.Start();
+                    RSA? publicKey = certificate?.GetRSAPublicKey();
+                    rsaSw.Stop();
                     
+                    if (publicKey != null)
+                    {
+                        rsaCount++;
+                    }
+                }
+
+                if (primarySignature != null)
+                {
                     Signature signature = primarySignature;
                     CryptographicAttributeObjectCollection unsignedAttributes = signature.SignerInfo.UnsignedAttributes;
                     foreach (CryptographicAttributeObject attribute in unsignedAttributes)
