@@ -91,8 +91,6 @@ public class PackageVerifier3
                                         rsaTimestampCount++;
                                     }
                                 }
-
-                                timestampCms.CheckSignature(true);
                             }
                         }
                     }
