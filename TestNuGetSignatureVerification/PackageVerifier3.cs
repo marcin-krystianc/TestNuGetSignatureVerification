@@ -55,6 +55,7 @@ public class PackageVerifier3
                 var primarySignature = await packageReader.GetPrimarySignatureAsync(CancellationToken.None);
                 getPrimarySw.Stop();
                 
+                /*
                 if (primarySignature is RepositoryPrimarySignature repositoryPrimarySignature)
                 {
                     var certificate = repositoryPrimarySignature.SignerInfo.Certificate;
@@ -101,6 +102,7 @@ public class PackageVerifier3
                         }
                     }
                 }
+            */
             }
         }
 
