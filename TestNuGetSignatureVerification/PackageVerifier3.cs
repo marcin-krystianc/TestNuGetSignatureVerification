@@ -41,7 +41,7 @@ public class PackageVerifier3
         Console.WriteLine($"Found {packages.Count} packages in '{globalPackages}");
 
         var rsaCount = 0;
-        var timestampCmsCount = 0;
+        var rsaTimestampCount = 0;
         
         var sw = Stopwatch.StartNew();
         foreach (var packagePath in packages)
@@ -64,8 +64,7 @@ public class PackageVerifier3
                     }
                     
                     Signature signature = primarySignature;
-                    var signerInfo = signature.SignerInfo;
-                    CryptographicAttributeObjectCollection unsignedAttributes = signerInfo.UnsignedAttributes;
+                    CryptographicAttributeObjectCollection unsignedAttributes = signature.SignerInfo.UnsignedAttributes;
                     foreach (CryptographicAttributeObject attribute in unsignedAttributes)
                     {
                         if (string.Equals(attribute.Oid.Value, Oids.SignatureTimeStampTokenAttribute, StringComparison.Ordinal))
@@ -73,22 +72,18 @@ public class PackageVerifier3
                             foreach (AsnEncodedData value in attribute.Values)
                             {
                                 var timestampCms = new SignedCms();
-
                                 timestampCms.Decode(value.RawData);
 
-                                /*
-                                using (var certificates = SignatureUtility.GetTimestampCertificates(
-                                           timestampCms,
-                                           SigningSpecifications.V1,
-                                           "signature"))
+                                foreach (var signerInfo in timestampCms.SignerInfos)
                                 {
-                                    if (certificates == null || certificates.Count == 0)
+                                    var certificate = signerInfo.Certificate;
+                                    RSA? publicKey = certificate?.GetRSAPublicKey();
+                                    if (publicKey != null)
                                     {
-                                        throw new SignatureException(NuGetLogCode.NU3029, Strings.InvalidTimestampSignature);
+                                        rsaTimestampCount++;
                                     }
                                 }
-*/
-                                timestampCmsCount++;
+
                                 timestampCms.CheckSignature(true);
                             }
                         }
@@ -96,7 +91,8 @@ public class PackageVerifier3
                 }
             }
         }
+
         sw.Stop();
-        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{sw.Elapsed.TotalSeconds}, count(GetRSAPublicKey)={rsaCount}, count(TimestampCms)={timestampCmsCount}" );
+        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{sw.Elapsed.TotalSeconds}, count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
     }
 }
