@@ -45,6 +45,7 @@ public class PackageVerifier3
         
         var sw = Stopwatch.StartNew();
         var rsaSw = new Stopwatch();
+        var decodeSw = new Stopwatch();
         foreach (var packagePath in packages)
         {
             using (var packageReader = new PackageArchiveReader(packagePath))
@@ -75,8 +76,11 @@ public class PackageVerifier3
                             foreach (AsnEncodedData value in attribute.Values)
                             {
                                 var timestampCms = new SignedCms();
+                                
+                                decodeSw.Start();
                                 timestampCms.Decode(value.RawData);
-
+                                decodeSw.Stop();
+                                
                                 foreach (var signerInfo in timestampCms.SignerInfos)
                                 {
                                     var certificate = signerInfo.Certificate;
@@ -98,6 +102,6 @@ public class PackageVerifier3
         }
 
         sw.Stop();
-        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{rsaSw.Elapsed.TotalSeconds}/{sw.Elapsed.TotalSeconds}', count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
+        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{decodeSw.Elapsed.TotalSeconds}/{rsaSw.Elapsed.TotalSeconds}/{sw.Elapsed.TotalSeconds}', count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
     }
 }
