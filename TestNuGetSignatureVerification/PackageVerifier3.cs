@@ -41,6 +41,8 @@ public class PackageVerifier3
         Console.WriteLine($"Found {packages.Count} packages in '{globalPackages}");
 
         var rsaCount = 0;
+        var timestampCmsCount = 0;
+        
         var sw = Stopwatch.StartNew();
         foreach (var packagePath in packages)
         {
@@ -60,11 +62,10 @@ public class PackageVerifier3
                             rsaCount++;
                         }
                     }
-                    /*
+                    
                     Signature signature = primarySignature;
                     var signerInfo = signature.SignerInfo;
                     CryptographicAttributeObjectCollection unsignedAttributes = signerInfo.UnsignedAttributes;
-                    var timestampList = new List<Timestamp>();
                     foreach (CryptographicAttributeObject attribute in unsignedAttributes)
                     {
                         if (string.Equals(attribute.Oid.Value, Oids.SignatureTimeStampTokenAttribute, StringComparison.Ordinal))
@@ -75,6 +76,7 @@ public class PackageVerifier3
 
                                 timestampCms.Decode(value.RawData);
 
+                                /*
                                 using (var certificates = SignatureUtility.GetTimestampCertificates(
                                            timestampCms,
                                            SigningSpecifications.V1,
@@ -85,16 +87,16 @@ public class PackageVerifier3
                                         throw new SignatureException(NuGetLogCode.NU3029, Strings.InvalidTimestampSignature);
                                     }
                                 }
-
-                                timestampList.Add(new Timestamp(timestampCms));
+*/
+                                timestampCmsCount++;
+                                timestampCms.CheckSignature(true);
                             }
                         }
                     }
-                    */
                 }
             }
         }
         sw.Stop();
-        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{sw.Elapsed.TotalSeconds}, count(GetRSAPublicKey)={rsaCount}" );
+        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{sw.Elapsed.TotalSeconds}, count(GetRSAPublicKey)={rsaCount}, count(TimestampCms)={timestampCmsCount}" );
     }
 }
