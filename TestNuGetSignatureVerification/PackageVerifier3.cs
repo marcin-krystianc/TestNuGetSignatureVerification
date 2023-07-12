@@ -44,6 +44,7 @@ public class PackageVerifier3
         var rsaTimestampCount = 0;
         
         var sw = Stopwatch.StartNew();
+        var rsaSw = new Stopwatch();
         foreach (var packagePath in packages)
         {
             using (var packageReader = new PackageArchiveReader(packagePath))
@@ -56,7 +57,10 @@ public class PackageVerifier3
                     {
                         var certificate = repositoryPrimarySignature.SignerInfo.Certificate;
                    
+                        rsaSw.Start();
                         RSA? publicKey = certificate?.GetRSAPublicKey();
+                        rsaSw.Stop();
+                        
                         if (publicKey != null)
                         {
                             rsaCount++;
@@ -77,7 +81,11 @@ public class PackageVerifier3
                                 foreach (var signerInfo in timestampCms.SignerInfos)
                                 {
                                     var certificate = signerInfo.Certificate;
+
+                                    rsaSw.Start();
                                     RSA? publicKey = certificate?.GetRSAPublicKey();
+                                    rsaSw.Stop();
+
                                     if (publicKey != null)
                                     {
                                         rsaTimestampCount++;
@@ -93,6 +101,6 @@ public class PackageVerifier3
         }
 
         sw.Stop();
-        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{sw.Elapsed.TotalSeconds}, count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
+        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{rsaSw.Elapsed.TotalSeconds}/{sw.Elapsed.TotalSeconds}', count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
     }
 }
