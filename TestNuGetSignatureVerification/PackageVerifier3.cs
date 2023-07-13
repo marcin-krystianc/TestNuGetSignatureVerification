@@ -21,23 +21,6 @@ public class PackageVerifier3
             .EnumerateFiles(globalPackages, "*.nupkg", SearchOption.AllDirectories)
             .ToList();
 
-        var provider = new SignatureTrustAndValidityVerificationProvider();
-        var verifierSettings = new SignedPackageVerifierSettings
-            (
-                allowUnsigned:true,
-                allowIllegal:true,
-                allowUntrusted:true,
-                allowIgnoreTimestamp:true,
-                allowMultipleTimestamps:true,
-                allowNoTimestamp:true,
-                allowUnknownRevocation:true,
-                reportUnknownRevocation:false,
-                verificationTarget: VerificationTarget.All,
-                signaturePlacement: SignaturePlacement.Any,
-                repositoryCountersignatureVerificationBehavior: SignatureVerificationBehavior.IfExists,
-                revocationMode: RevocationMode.Offline
-            );
-        
         Console.WriteLine($"Found {packages.Count} packages in '{globalPackages}");
 
         var rsaCount = 0;
@@ -46,14 +29,14 @@ public class PackageVerifier3
         var sw = Stopwatch.StartNew();
         var rsaSw = new Stopwatch();
         var getCertificateSw = new Stopwatch();
-        var getPrimarySw = new Stopwatch();
+        var getPrimarySignatureSw = new Stopwatch();
         foreach (var packagePath in packages)
         {
             using (var packageReader = new PackageArchiveReader(packagePath))
             {
-                getPrimarySw.Start();
+                getPrimarySignatureSw.Start();
                 var primarySignature = await packageReader.GetPrimarySignatureAsync(CancellationToken.None);
-                getPrimarySw.Stop();
+                getPrimarySignatureSw.Stop();
                 
                 if (primarySignature is RepositoryPrimarySignature repositoryPrimarySignature)
                 {
@@ -105,6 +88,6 @@ public class PackageVerifier3
         }
 
         sw.Stop();
-        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in '{getPrimarySw.Elapsed.TotalSeconds}/{getCertificateSw.Elapsed.TotalSeconds}/{rsaSw.Elapsed.TotalSeconds}/{sw.Elapsed.TotalSeconds}', count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
+        Console.WriteLine($"PackageVerifier3: Processed {packages.Count} packages in {sw.Elapsed.TotalSeconds}, PrimarySignature={getPrimarySignatureSw.Elapsed.TotalSeconds}, GetRSAPublicKey={rsaSw.Elapsed.TotalSeconds}, GetCertificate={getCertificateSw.Elapsed.TotalSeconds}, count(GetRSAPublicKey)={rsaCount}, count(TimestampRsa)={rsaTimestampCount}" );
     }
 }
